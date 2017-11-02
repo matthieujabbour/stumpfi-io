@@ -1,0 +1,17 @@
+# testing & benchmarks
+test
+coverage
+benchmarks
+
+# development
+src
+VS projects
+scripts
+config
+
+# misc
+.npmignore
+.gitattributes
+.eslintrc
+.babelrc
+yarn.lock
