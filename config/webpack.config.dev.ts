@@ -19,6 +19,7 @@ const developmentConfig : webpack.Configuration = {
   bail: false,
   cache: true,
   context: src,
+  devtool: 'source-map',
   node: {
     __dirname: false,
   },

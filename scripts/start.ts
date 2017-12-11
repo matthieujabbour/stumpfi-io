@@ -18,8 +18,8 @@ import config from '../config/webpack.config.dev';
 
 
 const types : string = 'types.d.ts';
-const stumpfiRenderer : string = 'stumpfi-renderer.min.js';
 const compiler : webpack.Compiler = webpack(config);
+const stumpfiRenderer : string = 'stumpfi-renderer.min.js';
 const distPath : string = path.resolve(__dirname, '../dist');
 
 

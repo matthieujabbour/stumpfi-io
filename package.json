@@ -1,6 +1,6 @@
 {
   "name": "stumpfi-io",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Converts stumpfi documents to HTML and vice-versa.",
   "repository": "https://github.com/matthieujabbour/stumpfi-io",
   "homepage": "https://github.com/matthieujabbour/stumpfi-io",
@@ -30,7 +30,7 @@
     "awesome-typescript-loader": "^3.2.3",
     "jest": "^21.1.0",
     "ts-jest": "^21.0.1",
-    "ts-node": "^3.3.0",
+    "ts-node": "^4.0.1",
     "tslint": "^5.6.0",
     "tslint-config-stumpfi": "^1.0.7",
     "tslint-loader": "^3.5.3",
@@ -39,19 +39,20 @@
     "webpack": "^3.5.5"
   },
   "dependencies": {
-    "fs-extra": "^4.0.1",
-    "stumpfi": "^3.0.0"
+    "fs-extra": "^5.0.0",
+    "stumpfi": "^4.0.1"
   },
   "scripts": {
     "start": "ts-node scripts/start",
     "build": "ts-node scripts/build",
     "test": "ts-node scripts/test --coverage --watch",
-    "doc": "./node_modules/.bin/typedoc --out ./doc/ src/"
+    "doc": "./node_modules/.bin/typedoc --out ./doc/ src/ --exclude \"**/__+(tests|mocks)__/**\""
   },
   "engines": {
     "node": ">= 4"
   },
   "jest": {
+    "mapCoverage": true,
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
     "transform": {
       ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"

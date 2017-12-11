@@ -19,6 +19,7 @@ const productionConfig : webpack.Configuration = {
   bail: true,
   cache: false,
   context: src,
+  devtool: 'source-map',
   node: {
     __dirname: false,
   },
@@ -75,16 +76,18 @@ const productionConfig : webpack.Configuration = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"',
     }),
-    new webpack.optimize.UglifyJsPlugin({
-      sourceMap: true,
-      beautify: false,
-      mangle: false,
-      compress: {
-        screw_ie8: true,
-        warnings: false,
-      },
-      comments: false,
-    }),
+    // This plugin has been temporarely disabled since `webpack.optimize.UglifyJsPlugin` does
+    // not support ES6+.
+    // new webpack.optimize.UglifyJsPlugin({
+    //   sourceMap: true,
+    //   beautify: false,
+    //   mangle: false,
+    //   compress: {
+    //     screw_ie8: true,
+    //     warnings: false,
+    //   },
+    //   comments: false,
+    // }),
   ],
 };
 

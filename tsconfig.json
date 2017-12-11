@@ -6,14 +6,15 @@
     "newLine": "LF",
     "strict": true,
     "strictNullChecks": true,
-    "target": "es5",
-    "lib": ["dom", "es7", "scripthost", "dom.iterable"],
+    "target": "es2016",
     "module": "commonjs",
     "noImplicitAny": true,
     "noUnusedParameters": true,
     "noUnusedLocals": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
-  }
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true
+  },
+  "exclude": ["**/__tests__/*", "**/__mocks__/*"]
 }

@@ -21,13 +21,13 @@ interface Attributes {
 }
 
 
-/** JSON-formated stumpfi content type declaration. */
+/** JSON-formatted stumpfi content type declaration. */
 interface JsonContent {
   readonly html : string;
 }
 
 
-/** JSON-formated stumpfi component type declaration. */
+/** JSON-formatted stumpfi component type declaration. */
 interface JsonComponent {
   readonly content : string;
   readonly className : string;
@@ -35,7 +35,7 @@ interface JsonComponent {
 }
 
 
-/** JSON-formated stumpfi resource type declaration. */
+/** JSON-formatted stumpfi resource type declaration. */
 interface JsonResource {
   readonly type : string;
   readonly content : string | null;
@@ -43,7 +43,7 @@ interface JsonResource {
 }
 
 
-/** JSON-formated stumpfi page type declaration. */
+/** JSON-formatted stumpfi page type declaration. */
 interface JsonPage {
   readonly master : string | null;
   readonly components : string[];
@@ -51,7 +51,7 @@ interface JsonPage {
 }
 
 
-/** JSON-formated stumpfi document type declaration. */
+/** JSON-formatted stumpfi document type declaration. */
 interface JsonDocument {
   readonly name : string;
   readonly authors : string[];
@@ -62,7 +62,7 @@ interface JsonDocument {
 }
 
 
-/** JSON-formated stumpfi entities register type declaration. */
+/** JSON-formatted stumpfi entities register type declaration. */
 interface JsonEntities {
   documents : {
     [key : string] : JsonDocument;
@@ -126,7 +126,7 @@ const renderResource : (data : JsonResource) => string = (data) => {
  * @returns {string} The stumpfi-encoded HTML document.
  */
 export default function toHTML(document : Document) : string {
-  // Stumpfi JSON-formated entities register.
+  // Stumpfi JSON-formatted entities register.
   const jsonEntities : JsonEntities = {
     documents: {},
     pages: {},
