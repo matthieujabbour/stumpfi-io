@@ -114,4 +114,4 @@ export function fromHTML(htmlDocument : string) : Document;
  * @param {Document} document The stumpfi document to convert.
  * @returns {string} The stumpfi-encoded HTML document.
  */
-export default function toHTML(document : Document) : string;
+export function toHTML(document : Document) : string;

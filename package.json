@@ -1,6 +1,6 @@
 {
   "name": "stumpfi-io",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Converts stumpfi documents to HTML and vice-versa.",
   "repository": "https://github.com/matthieujabbour/stumpfi-io",
   "homepage": "https://github.com/matthieujabbour/stumpfi-io",
