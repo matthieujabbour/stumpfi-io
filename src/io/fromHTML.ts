@@ -4,97 +4,8 @@
  */
 
 
-import { Component, Content, Document, Page, Resource } from 'stumpfi';
-
-
-/** CSS properties type definition. */
-interface CssProperties {
-  [x : string] : string;
-}
-
-
-/** Resource attributes list type declaration. */
-interface Attributes {
-  [key : string] : string | boolean;
-}
-
-
-/** JSON-formatted stumpfi content type declaration. */
-interface JsonContent {
-  readonly html : string;
-}
-
-
-/** JSON-formatted stumpfi component type declaration. */
-interface JsonComponent {
-  readonly content : string;
-  readonly className : string;
-  readonly style : CssProperties;
-}
-
-
-/** JSON-formatted stumpfi resource type declaration. */
-interface JsonResource {
-  readonly type : string;
-  readonly content : string;
-  readonly attributes : Attributes;
-}
-
-
-/** JSON-formatted stumpfi page type declaration. */
-interface JsonPage {
-  readonly master : string | null;
-  readonly components : string[];
-  readonly resources : string[];
-}
-
-
-/** JSON-formatted stumpfi document type declaration. */
-interface JsonDocument {
-  readonly name : string;
-  readonly authors : string[];
-  readonly description : string;
-  readonly tags : string[];
-  readonly resources : string[];
-  readonly pages : string[];
-}
-
-
-/** JSON-formatted stumpfi entities register type declaration. */
-interface JsonEntities {
-  documents : {
-    [key : string] : JsonDocument;
-  };
-  pages : {
-    [key : string] : JsonPage;
-  };
-  resources : {
-    [key : string] : JsonResource;
-  };
-  components : {
-    [key : string] : JsonComponent;
-  };
-  contents : {
-    [key : string] : JsonContent;
-  };
-}
-
-
-/** Stumpfi entities register type declaration. */
-interface Entities {
-  pages : {
-    [key : string] : Page;
-  };
-  resources : {
-    [key : string] : Resource;
-  };
-  components : {
-    [key : string] : Component;
-  };
-  contents : {
-    [key : string] : Content;
-  };
-}
+import { Component, Content, Document, Page, Resource, Template } from 'stumpfi';
+import { Entities, JsonComponent, JsonEntities, JsonResource } from '../types';
 
 
 /**
@@ -106,94 +17,121 @@ interface Entities {
 export default function fromHTML(htmlDocument : string) : Document {
   // Stumpfi entities register.
   const entities : Entities = {
-    contents: {},
-    components: {},
-    resources: {},
     pages: {},
+    resources: {},
+    components: {},
+    contents: {},
+    templates: {},
   };
 
 
-  // This regexp helps us to extract the JSON declaration from the HTML document.
-  const jsonRegexp : RegExp = /\<body><div style="visibility: hidden;">{(.*)}<\/div>\<\/body>/;
-  const jsonDocument : RegExpExecArray | null = jsonRegexp.exec(htmlDocument);
-  if (jsonDocument === null) {
-    throw new Error('Input string is not a valid stumpfi HTML document.');
-  }
-  const jsonEntities : JsonEntities = JSON.parse(`{${jsonDocument[1]}}`);
+  try {
+    // This regexp helps us to extract the JSON declaration from the HTML document.
+    const jsonRegexp : RegExp = /\<body><div style="display: none;">{(.*)}<\/div>\<\/body>/;
+    const jsonDocument : RegExpExecArray | null = jsonRegexp.exec(htmlDocument);
 
-
-  // Fills the register with a new stumpfi Content instance retrieved from a JSON content.
-  const jsonToContent : (contentId : string) => Content = (contentId) => {
-    if (entities.contents[contentId] === undefined) {
-      entities.contents[contentId] = new Content(jsonEntities.contents[contentId].html);
+    if (jsonDocument === null) {
+      throw new Error('Input string is not a valid stumpfi HTML document.');
     }
-    return entities.contents[contentId];
-  };
+
+    const jsonEntities : JsonEntities = JSON.parse(`{${jsonDocument[1]}}`);
 
 
-  // Fills the register with a new stumpfi Component instance retrieved from a JSON component.
-  const jsonToComponent : (componentId : string) => Component = (componentId) => {
-    if (entities.components[componentId] === undefined) {
-      entities.components[componentId] = new Component(
-        jsonToContent(jsonEntities.components[componentId].content),
-      );
-      entities.components[componentId].setClassName(jsonEntities.components[componentId].className);
-      entities.components[componentId].setStyle(jsonEntities.components[componentId].style);
-    }
-    return entities.components[componentId];
-  };
-
-
-  // Fills the register with a new stumpfi Resource instance retrieved from a JSON resource.
-  const jsonToResource : (resourceId : string) => Resource = (resourceId) => {
-    if (entities.resources[resourceId] === undefined) {
-      const jsonResource : JsonResource = jsonEntities.resources[resourceId];
-      entities.resources[resourceId] = new Resource(jsonResource.type);
-      entities.resources[resourceId].setContent(jsonResource.content);
-      Object.keys(jsonResource.attributes).forEach((attribute) => {
-        entities.resources[resourceId].setAttribute(attribute, jsonResource.attributes[attribute]);
-      });
-    }
-    return entities.resources[resourceId];
-  };
-
-
-  // Fills the register with a new stumpfi Page instance retrieved from a JSON page.
-  const jsonToPage : (pageId : string) => Page = (pageId) => {
-    if (entities.pages[pageId] === undefined) {
-      entities.pages[pageId] = new Page();
-      if (jsonEntities.pages[pageId].master !== null) {
-        entities.pages[pageId].setMaster(jsonToPage(jsonEntities.pages[pageId].master as string));
+    // Fills the register with a new stumpfi Content instance retrieved from a JSON content.
+    const jsonToContent : (contentId : string) => Content = (contentId) => {
+      if (entities.contents[contentId] === undefined) {
+        entities.contents[contentId] = new Content(
+          jsonEntities.contents[contentId].type,
+          jsonEntities.contents[contentId].markupText,
+        );
       }
-      jsonEntities.pages[pageId].resources.forEach((resource) => {
-        entities.pages[pageId].addResource(jsonToResource(resource));
-      });
-      jsonEntities.pages[pageId].components.forEach((component) => {
-        entities.pages[pageId].addComponent(jsonToComponent(component));
-      });
-    }
-    return entities.pages[pageId];
-  };
+      return entities.contents[contentId];
+    };
 
 
-  // Building the stumpfi Document instance...
-  const documentId : string = Object.keys(jsonEntities.documents)[0];
-  const document : Document = new Document(
-    jsonEntities.documents[documentId].name,
-    jsonEntities.documents[documentId].description,
-  );
-  jsonEntities.documents[documentId].authors.forEach((author) => {
-    document.addAuthor(author);
-  });
-  jsonEntities.documents[documentId].tags.forEach((tag) => {
-    document.addTag(tag);
-  });
-  jsonEntities.documents[documentId].resources.forEach((resource) => {
-    document.addResource(jsonToResource(resource));
-  });
-  jsonEntities.documents[documentId].pages.forEach((pageId) => {
-    document.addPage(jsonToPage(pageId));
-  });
+    // Fills the register with a new stumpfi Resource instance retrieved from a JSON resource.
+    const jsonToResource : (resourceId : string) => Resource = (resourceId) => {
+      if (entities.resources[resourceId] === undefined) {
+        const jsonResource : JsonResource = jsonEntities.resources[resourceId];
+        entities.resources[resourceId] = new Resource(jsonResource.type);
+        if (jsonResource.content !== null) {
+          entities.resources[resourceId].setContent(jsonResource.content);
+        }
+        Object.keys(jsonResource.attributes).forEach((attr) => {
+          entities.resources[resourceId].setAttribute(attr, jsonResource.attributes[attr]);
+        });
+      }
+      return entities.resources[resourceId];
+    };
 
-  return document;
+
+    // Fills the register with a new stumpfi Template instance retrieved from a JSON template.
+    const jsonToTemplate : (templateId : string) => Template = (templateId) => {
+      if (entities.templates[templateId] === undefined) {
+        entities.templates[templateId] = new Template(jsonEntities.templates[templateId].code);
+        jsonEntities.templates[templateId].resources.forEach((resource) => {
+          entities.templates[templateId].addResource(jsonToResource(resource));
+        });
+      }
+      return entities.templates[templateId];
+    };
+
+
+    // Fills the register with a new stumpfi Component instance retrieved from a JSON component.
+    const jsonToComponent : (componentId : string) => Component = (componentId) => {
+      if (entities.components[componentId] === undefined) {
+        const jsonComponent : JsonComponent = jsonEntities.components[componentId];
+        entities.components[componentId] = new Component();
+        entities.components[componentId].setCoordinates(jsonComponent.coordinates);
+        entities.components[componentId].setDimensions(jsonComponent.dimensions);
+        entities.components[componentId].setTemplate(jsonToTemplate(jsonComponent.template));
+        jsonComponent.contents.forEach((content, index) => {
+          entities.components[componentId].setContentAt(index, jsonToContent(content));
+        });
+      }
+      return entities.components[componentId];
+    };
+
+
+    // Fills the register with a new stumpfi Page instance retrieved from a JSON page.
+    const jsonToPage : (pageId : string) => Page = (pageId) => {
+      if (entities.pages[pageId] === undefined) {
+        entities.pages[pageId] = new Page();
+        if (jsonEntities.pages[pageId].master !== null) {
+          entities.pages[pageId].setMaster(jsonToPage(jsonEntities.pages[pageId].master as string));
+        }
+        jsonEntities.pages[pageId].resources.forEach((resource) => {
+          entities.pages[pageId].addResource(jsonToResource(resource));
+        });
+        jsonEntities.pages[pageId].components.forEach((component) => {
+          entities.pages[pageId].addComponent(jsonToComponent(component));
+        });
+      }
+      return entities.pages[pageId];
+    };
+
+
+    // Building the stumpfi Document instance...
+    const documentId : string = Object.keys(jsonEntities.documents)[0];
+    const document : Document = new Document(
+      jsonEntities.documents[documentId].name,
+      jsonEntities.documents[documentId].description,
+    );
+    jsonEntities.documents[documentId].authors.forEach((author) => {
+      document.addAuthor(author);
+    });
+    jsonEntities.documents[documentId].tags.forEach((tag) => {
+      document.addTag(tag);
+    });
+    jsonEntities.documents[documentId].resources.forEach((resource) => {
+      document.addResource(jsonToResource(resource));
+    });
+    jsonEntities.documents[documentId].pages.forEach((pageId) => {
+      document.addPage(jsonToPage(pageId));
+    });
+
+    return document;
+  } catch (error) {
+    throw new Error(`Given input is not a valid stumpfi HTML document (${error.message}).`);
+  }
 }

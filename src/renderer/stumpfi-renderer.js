@@ -6,6 +6,7 @@
 
 window.onload = function() {
   const jsonEntities = JSON.parse(document.body.childNodes[0].innerHTML);
+  let parseError = false;
 
 
   /**
@@ -47,11 +48,27 @@ window.onload = function() {
    * @param {JsonComponent} data The component to render.
    * @returns {string} The rendered HTML tag.
    */
-  const renderComponent = data => (
-    `<div class="${data.className}" style="${Object.keys(data.style).reduce((str, prop) => `${camelCaseToAttribute(prop)}: ${data.style[prop]}; ${str}`, '').trim()}">` +
-      `${jsonEntities.contents[data.content].html}` +
-    `</div>`
-  );
+  const renderComponent = (data) => {
+    const style = (
+      `position: absolute;` +
+      `width: ${data.dimensions.w}%;` +
+      `height: ${data.dimensions.h}%;` +
+      `top: ${data.coordinates.y}%;` +
+      `left: ${data.coordinates.x}%;`
+    );
+
+    const replacer = (match, pattern1, offset) => {
+      if (pattern1 !== jsonEntities.contents[data.contents[offset]].type) {
+        console.warn(`Content #${data.contents[offset]}'s type is not compatible with ${pattern1}.`);
+        parseError = true;
+      }
+      return (jsonEntities.contents[data.contents[offset]].markupText);
+    };
+
+    const template = jsonEntities.templates[data.template];
+    const hydratedTemplate = template.code.replace(/\{\{(RICH_TEXT|SIMPLE_TEXT|MEDIA)\}\}/g, replacer);
+    return `<div style="${style}">${hydratedTemplate}</div>`
+  };
 
 
   /**
@@ -62,6 +79,7 @@ window.onload = function() {
   const renderPage = (data) => {
     const htmlComponents = [];
     const htmlResources = [];
+
     // This script is used to automatically scale page's font size to its width.
     htmlResources.unshift(renderResource({
       tagName: 'script',
@@ -72,6 +90,7 @@ window.onload = function() {
       'window.addEventListener(\'resize\', scale); window.onload = scale;',
       attributes: { type: 'text/javascript', 'data-default': true },
     }));
+ 
     // This style is used to automatically scale page's dimensions to frame size,
     // keeping the specified ratio.
     htmlResources.unshift(renderResource({
@@ -81,6 +100,7 @@ window.onload = function() {
       'max-height: 100vh; position: relative; margin: 0;}',
       attributes: { type: 'text/css', 'data-default': true },
     }));
+
     let page = data;
     while (page !== null) {
       page.resources.forEach((resource) => { htmlResources.unshift(renderResource(resource)); });
@@ -112,4 +132,8 @@ window.onload = function() {
     });
     document.body.innerHTML = innerHTML;
   });
+
+  if (parseError === true) {
+    console.error('One or many errors occured during document rendering. This may affect displaying.');
+  }
 };

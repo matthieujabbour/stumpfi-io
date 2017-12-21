@@ -4,7 +4,7 @@
  */
 
 
-import { Attributes, Component, Content, ContentTypes, Dimensions, Document, Page, Resource, Template } from 'stumpfi';
+import { Attributes, Component, Content, ContentTypes, Coordinates, Dimensions, Page, Resource, Template } from 'stumpfi';
 
 
 /** JSON-formatted stumpfi resource type declaration. */
@@ -98,20 +98,3 @@ export interface Entities {
     [key : string] : Template;
   };
 }
-
-
-/**
- * Converts a stumpfi-encoded HTML document back to a stumpfi Document instance.
- * @param {string} htmlDocument The HTML document to convert.
- * @returns {Document} The new stumpfi Document instance.
- * @throws Throws an Error if the input is not a valid stumpfi HTML document.
- */
-export function fromHTML(htmlDocument : string) : Document;
-
-
-/**
- * Converts a stumpfi Document instance into a stumpfi-encoded HTML document.
- * @param {Document} document The stumpfi document to convert.
- * @returns {string} The stumpfi-encoded HTML document.
- */
-export default function toHTML(document : Document) : string;

@@ -6,84 +6,12 @@
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { Component, Content, Document, Page, Resource } from 'stumpfi';
-
-
-/** CSS properties type definition. */
-interface CssProperties {
-  [x : string] : string;
-}
-
-
-/** Resource attributes list type declaration. */
-interface Attributes {
-  [key : string] : string | boolean;
-}
-
-
-/** JSON-formatted stumpfi content type declaration. */
-interface JsonContent {
-  readonly html : string;
-}
-
-
-/** JSON-formatted stumpfi component type declaration. */
-interface JsonComponent {
-  readonly content : string;
-  readonly className : string;
-  readonly style : CssProperties;
-}
-
-
-/** JSON-formatted stumpfi resource type declaration. */
-interface JsonResource {
-  readonly type : string;
-  readonly content : string | null;
-  readonly attributes : Attributes;
-}
-
-
-/** JSON-formatted stumpfi page type declaration. */
-interface JsonPage {
-  readonly master : string | null;
-  readonly components : string[];
-  readonly resources : string[];
-}
-
-
-/** JSON-formatted stumpfi document type declaration. */
-interface JsonDocument {
-  readonly name : string;
-  readonly authors : string[];
-  readonly description : string;
-  readonly tags : string[];
-  readonly resources : string[];
-  readonly pages : string[];
-}
-
-
-/** JSON-formatted stumpfi entities register type declaration. */
-interface JsonEntities {
-  documents : {
-    [key : string] : JsonDocument;
-  };
-  pages : {
-    [key : string] : JsonPage;
-  };
-  resources : {
-    [key : string] : JsonResource;
-  };
-  components : {
-    [key : string] : JsonComponent;
-  };
-  contents : {
-    [key : string] : JsonContent;
-  };
-}
+import { Attributes, Component, Content, Document, Page, Resource, Template } from 'stumpfi';
+import { JsonDocument, JsonEntities, JsonResource } from '../types';
 
 
 /** Path to the stumpfi-renderer JS script. */
-const stumpfiRendererFilePath : string = path.resolve(__dirname, '../renderer/stumpfi-renderer.min.js');
+const stumpfiRendererFilePath : string = path.resolve(__dirname, './stumpfi-renderer.min.js');
 
 
 /**
@@ -103,6 +31,7 @@ const camelCaseToAttribute : (camelCase : string) => string = camelCase => (
  */
 const renderResource : (data : JsonResource) => string = (data) => {
   const dataAttributes : Attributes = data.attributes;
+  /** @todo false attribute */
   const attributes : string = Object.keys(dataAttributes).reduce((str, attribute) => (
     (typeof dataAttributes[attribute] === 'string')
       ? `${str} ${camelCaseToAttribute(attribute)}="${dataAttributes[attribute]}"`
@@ -133,30 +62,7 @@ export default function toHTML(document : Document) : string {
     resources: {},
     components: {},
     contents: {},
-  };
-
-
-  // Fills the register with a JSON content generated from a stumpfi Content instance.
-  const contentToJson : (content : Content) => string = (content) => {
-    if (jsonEntities.contents[content.getId()] === undefined) {
-      jsonEntities.contents[content.getId()] = {
-        html: content.getHtml(),
-      };
-    }
-    return content.getId();
-  };
-
-
-  // Fills the register with a JSON component generated from a stumpfi Component instance.
-  const componentToJson : (component : Component) => string = (component) => {
-    if (jsonEntities.components[component.getId()] === undefined) {
-      jsonEntities.components[component.getId()] = {
-        content: contentToJson(component.getContent()),
-        className: component.getClassName(),
-        style: component.getStyle(),
-      };
-    }
-    return component.getId();
+    templates: {},
   };
 
 
@@ -173,13 +79,51 @@ export default function toHTML(document : Document) : string {
   };
 
 
+  // Fills the register with a JSON template generated from a stumpfi Template instance.
+  const templateToJson : (template : Template) => string = (template) => {
+    if (jsonEntities.templates[template.getId()] === undefined) {
+      jsonEntities.templates[template.getId()] = {
+        resources: template.getResources().map(resourceToJson),
+        code: template.getCode(),
+      };
+    }
+    return template.getId();
+  };
+
+
+  // Fills the register with a JSON content generated from a stumpfi Content instance.
+  const contentToJson : (content : Content) => string = (content) => {
+    if (jsonEntities.contents[content.getId()] === undefined) {
+      jsonEntities.contents[content.getId()] = {
+        type: content.getType(),
+        markupText: content.getMarkupText(),
+      };
+    }
+    return content.getId();
+  };
+
+
+  // Fills the register with a JSON component generated from a stumpfi Component instance.
+  const componentToJson : (component : Component) => string = (component) => {
+    if (jsonEntities.components[component.getId()] === undefined) {
+      jsonEntities.components[component.getId()] = {
+        contents: component.getContents().map(contentToJson),
+        coordinates: component.getCoordinates(),
+        dimensions: component.getDimensions(),
+        template: templateToJson(component.getTemplate()),
+      };
+    }
+    return component.getId();
+  };
+
+
   // Fills the register with a JSON page generated from a stumpfi Page instance.
   const pageToJson : (page : Page) => string = (page) => {
     if (jsonEntities.pages[page.getId()] === undefined) {
       jsonEntities.pages[page.getId()] = {
+        resources: page.getResources(false).map(resourceToJson),
         master: (page.getMaster() !== null) ? pageToJson(page.getMaster() as Page) : null,
         components: page.getComponents(false).map(componentToJson),
-        resources: page.getResources(false).map(resourceToJson),
       };
     }
     return page.getId();
@@ -187,11 +131,11 @@ export default function toHTML(document : Document) : string {
 
 
   const data : JsonDocument = {
+    resources: document.getResources().map(resourceToJson),
     name: document.getName(),
-    authors: document.getAuthors(),
     description: document.getDescription(),
     tags: document.getTags(),
-    resources: document.getResources().map(resourceToJson),
+    authors: document.getAuthors(),
     pages: document.getPages().map(pageToJson),
   };
   jsonEntities.documents[document.getId()] = data;
@@ -215,7 +159,7 @@ export default function toHTML(document : Document) : string {
         `<noscript>The document cannot be rendered because Javascript is currently not enabled on your browser.</noscript>` +
       `</head>` +
       `<body>` +
-        `<div style="visibility: hidden;">${JSON.stringify(jsonEntities)}</div>` +
+        `<div style="display: none;">${JSON.stringify(jsonEntities)}</div>` +
       `</body>` +
     `</html>`
   );
