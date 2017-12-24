@@ -8,6 +8,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { Attributes, Component, Content, Document, Page, Resource, Template } from 'stumpfi';
 import { JsonDocument, JsonEntities, JsonResource } from '../types';
+import escape from '../utils/escape';
 
 
 /** Path to the stumpfi-renderer JS script. */
@@ -159,7 +160,7 @@ export default function toHTML(document : Document) : string {
         `<noscript>The document cannot be rendered because Javascript is currently not enabled on your browser.</noscript>` +
       `</head>` +
       `<body>` +
-        `<div style="display: none;">${JSON.stringify(jsonEntities)}</div>` +
+        `<div style="display: none;">${escape(JSON.stringify(jsonEntities))}</div>` +
       `</body>` +
     `</html>`
   );

@@ -4,8 +4,44 @@
  */
 
 
+const specialCharsMap = {
+  '&amp;': '&',
+  '&lt;': '<',
+  '&gt;': '>',
+  '&quot;': '"',
+  '&#039;': '\'',
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  '\'': '&#039;',
+};
+
+const replacer = match => specialCharsMap[match];
+
+
+/**
+ * Unescapes a text previously escaped with `escape`.
+ * @param {string} text Text to unescape.
+ * @returns {string} The unescaped text.
+ */
+function unescape(text) {
+  return text.replace(/(&amp;|&lt;|&gt;|&quot;|&#039;)/g, replacer);
+}
+
+
+/**
+ * Escapes HTML special characters of a text to prevent interpreting it as HTML.
+ * @param {string} text Text to escape.
+ * @returns {string} The escaped text.
+ */
+function escape(text) {
+  return text.replace(/[&<>"']/g, replacer);
+}
+
+
 window.onload = function() {
-  const jsonEntities = JSON.parse(document.body.childNodes[0].innerHTML);
+  const jsonEntities = JSON.parse(unescape(document.body.childNodes[0].innerHTML));
   let parseError = false;
 
 
@@ -34,7 +70,7 @@ window.onload = function() {
   
     switch (data.type) {
       case 'style':
-        return `<style ${attributes}>${data.content || ''}</style>`;
+      return `<style ${attributes}>${data.content || ''}</style>`;
       case 'script':
         return `<script ${attributes}>${data.content || ''}</script>`;
       default:
@@ -57,13 +93,22 @@ window.onload = function() {
       `left: ${data.coordinates.x}%;`
     );
 
-    const replacer = (match, pattern1, offset) => {
-      if (pattern1 !== jsonEntities.contents[data.contents[offset]].type) {
-        console.warn(`Content #${data.contents[offset]}'s type is not compatible with ${pattern1}.`);
-        parseError = true;
-      }
-      return (jsonEntities.contents[data.contents[offset]].markupText);
-    };
+    const replacer = (() => {
+      let index = 0;
+      return (match, pattern) => {
+        if (pattern !== jsonEntities.contents[data.contents[index]].type) {
+          console.warn(`Content #${data.contents[index]}'s type is not compatible with ${pattern}.`);
+          parseError = true;
+        }
+
+        // Associated content has been filled...
+        if (jsonEntities.contents[data.contents[index++]].markupText !== undefined) {
+          return escape(jsonEntities.contents[data.contents[index++]].markupText);
+        }
+        // No associated content...
+        return escape('PLACEHOLDER');
+      };
+    })();
 
     const template = jsonEntities.templates[data.template];
     const hydratedTemplate = template.code.replace(/\{\{(RICH_TEXT|SIMPLE_TEXT|MEDIA)\}\}/g, replacer);
@@ -82,7 +127,7 @@ window.onload = function() {
 
     // This script is used to automatically scale page's font size to its width.
     htmlResources.unshift(renderResource({
-      tagName: 'script',
+      type: 'script',
       content: 'function scale() {' +
         'const fontSize = Math.min(16/9 * window.innerHeight / 100, window.innerWidth / 100);' +
         'document.body.style.fontSize = `${fontSize}px`;' +
@@ -94,7 +139,7 @@ window.onload = function() {
     // This style is used to automatically scale page's dimensions to frame size,
     // keeping the specified ratio.
     htmlResources.unshift(renderResource({
-      tagName: 'style',
+      type: 'style',
       content: 'div[data-component-id]{overflow: auto; position: absolute;}' +
       'body{width: calc(16/9 * 100vh); height: calc(9/16 * 100vw); max-width: 100vw;' +
       'max-height: 100vh; position: relative; margin: 0;}',
@@ -103,7 +148,9 @@ window.onload = function() {
 
     let page = data;
     while (page !== null) {
-      page.resources.forEach((resource) => { htmlResources.unshift(renderResource(resource)); });
+      page.resources.forEach((resourceId) => {
+        htmlResources.unshift(renderResource(jsonEntities.resources[resourceId]));
+      });
       page.components.forEach((componentId) => {
         htmlComponents.unshift(renderComponent(jsonEntities.components[componentId]));
       });
@@ -121,7 +168,7 @@ window.onload = function() {
       `</html>`
     );
 
-    return `<iframe srcDoc="${srcDoc.replace(/\"/g, '&quot;')}" class="stumpfi page" />`;
+    return `<iframe srcDoc="${escape(srcDoc)}" class="stumpfi page" />`;
   };
   
 

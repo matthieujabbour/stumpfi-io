@@ -6,6 +6,7 @@
 
 import { Component, Content, Document, Page, Resource, Template } from 'stumpfi';
 import { Entities, JsonComponent, JsonEntities, JsonResource } from '../types';
+import unescape from '../utils/unescape';
 
 
 /**
@@ -34,7 +35,7 @@ export default function fromHTML(htmlDocument : string) : Document {
       throw new Error('Input string is not a valid stumpfi HTML document.');
     }
 
-    const jsonEntities : JsonEntities = JSON.parse(`{${jsonDocument[1]}}`);
+    const jsonEntities : JsonEntities = JSON.parse(`{${unescape(jsonDocument[1])}}`);
 
 
     // Fills the register with a new stumpfi Content instance retrieved from a JSON content.
