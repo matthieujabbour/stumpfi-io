@@ -5,6 +5,7 @@ v2.0.2 / 2017-12-23
  - Autoresizing scripts and styles are now correctly integrated into pages
  - Fixed HTML escaping issue in documents generated with `toHTML`
  - Templates with no associated content now display a placeholder instead of raising an error
+ - Resources present several times in a page are now inserted only once on rendering
 
 
 v2.0.1 / 2017-12-21

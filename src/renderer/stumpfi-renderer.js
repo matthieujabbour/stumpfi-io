@@ -96,17 +96,16 @@ window.onload = function() {
     const replacer = (() => {
       let index = 0;
       return (match, pattern) => {
+        // No associated content...
+        if (data.contents[index] === undefined) {
+          return escape('PLACEHOLDER');
+        }
+
         if (pattern !== jsonEntities.contents[data.contents[index]].type) {
           console.warn(`Content #${data.contents[index]}'s type is not compatible with ${pattern}.`);
           parseError = true;
         }
-
-        // Associated content has been filled...
-        if (jsonEntities.contents[data.contents[index++]].markupText !== undefined) {
-          return escape(jsonEntities.contents[data.contents[index++]].markupText);
-        }
-        // No associated content...
-        return escape('PLACEHOLDER');
+        return escape(jsonEntities.contents[data.contents[index++]].markupText);
       };
     })();
 
@@ -123,36 +122,43 @@ window.onload = function() {
    */
   const renderPage = (data) => {
     const htmlComponents = [];
-    const htmlResources = [];
+    // Declaring resources list as an object with unique keys helps to insert each resource
+    // only once.
+    const htmlResources = {};
 
     // This script is used to automatically scale page's font size to its width.
-    htmlResources.unshift(renderResource({
+    htmlResources['autoresizeScript'] = renderResource({
       type: 'script',
+      attributes: { type: 'text/javascript' },
       content: 'function scale() {' +
         'const fontSize = Math.min(16/9 * window.innerHeight / 100, window.innerWidth / 100);' +
         'document.body.style.fontSize = `${fontSize}px`;' +
       '}' +
       'window.addEventListener(\'resize\', scale); window.onload = scale;',
-      attributes: { type: 'text/javascript', 'data-default': true },
-    }));
+    });
  
     // This style is used to automatically scale page's dimensions to frame size,
     // keeping the specified ratio.
-    htmlResources.unshift(renderResource({
+    htmlResources['autoresizeStyle'] = renderResource({
       type: 'style',
+      attributes: { type: 'text/css' },
       content: 'div[data-component-id]{overflow: auto; position: absolute;}' +
       'body{width: calc(16/9 * 100vh); height: calc(9/16 * 100vw); max-width: 100vw;' +
       'max-height: 100vh; position: relative; margin: 0;}',
-      attributes: { type: 'text/css', 'data-default': true },
-    }));
+    });
 
     let page = data;
     while (page !== null) {
       page.resources.forEach((resourceId) => {
-        htmlResources.unshift(renderResource(jsonEntities.resources[resourceId]));
+        htmlResources[resourceId] = renderResource(jsonEntities.resources[resourceId]);
       });
       page.components.forEach((componentId) => {
         htmlComponents.unshift(renderComponent(jsonEntities.components[componentId]));
+        // Adding each page template's resource to the page...
+        const templateId = jsonEntities.components[componentId].template;
+        jsonEntities.templates[templateId].resources.forEach((resourceId) => {
+          htmlResources[resourceId] = renderResource(jsonEntities.resources[resourceId]);
+        });
       });
       page = (page.master === null) ? null : jsonEntities.pages[page.master];
     }
@@ -160,7 +166,7 @@ window.onload = function() {
       `<!DOCTYPE html>` +
       `<html>` +
         `<head>` +
-          `${htmlResources.join('')}` +
+          `${Object.keys(htmlResources).map(resourceId => htmlResources[resourceId]).join('')}` +
         `</head>` +
         `<body>` +
           `${htmlComponents.join('')}` +
