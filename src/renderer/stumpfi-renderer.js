@@ -40,6 +40,16 @@ function escape(text) {
 }
 
 
+/**
+ * Rendering functions for each content type.
+ */
+const contentTypesRenderers = {
+  SIMPLE_TEXT: content => content,
+  RICH_TEXT: content => content,
+  MEDIA: content => content,
+};
+
+
 window.onload = function() {
   const jsonEntities = JSON.parse(unescape(document.body.childNodes[0].innerHTML));
   let parseError = false;
@@ -105,7 +115,8 @@ window.onload = function() {
           console.warn(`Content #${data.contents[index]}'s type is not compatible with ${pattern}.`);
           parseError = true;
         }
-        return escape(jsonEntities.contents[data.contents[index++]].markupText);
+        const escapedContent = escape(jsonEntities.contents[data.contents[index++]].markupText);
+        return contentTypesRenderers[pattern](escapedContent);
       };
     })();
 
@@ -174,7 +185,7 @@ window.onload = function() {
       `</html>`
     );
 
-    return `<iframe srcDoc="${escape(srcDoc)}" class="stumpfi page" />`;
+    return `<iframe srcDoc="${escape(srcDoc)}" class="stumpfi page"></iframe>`;
   };
   
 

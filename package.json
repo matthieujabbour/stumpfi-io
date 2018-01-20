@@ -1,6 +1,6 @@
 {
   "name": "stumpfi-io",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Converts stumpfi documents to HTML and vice-versa.",
   "repository": "https://github.com/matthieujabbour/stumpfi-io",
   "homepage": "https://github.com/matthieujabbour/stumpfi-io",
@@ -9,7 +9,9 @@
     "stumpfi",
     "documents",
     "html",
-    "convert"
+    "convert",
+    "io",
+    "web"
   ],
   "author": "Matthieu JABBOUR <matthieu.jabbour@gmail.com> (https://github.com/matthieujabbour)",
   "contributors": [
@@ -24,12 +26,12 @@
   },
   "types": "./config/types.d.ts",
   "devDependencies": {
-    "@types/fs-extra": "^4.0.0",
-    "@types/jest": "^21.1.0",
+    "@types/fs-extra": "^5.0.0",
+    "@types/jest": "^22.0.1",
     "@types/webpack": "^3.0.9",
     "awesome-typescript-loader": "^3.2.3",
-    "jest": "^21.1.0",
-    "ts-jest": "^21.0.1",
+    "jest": "^22.1.4",
+    "ts-jest": "^22.0.1",
     "ts-node": "^4.0.1",
     "tslint": "^5.6.0",
     "tslint-config-stumpfi": "^1.0.7",
@@ -40,7 +42,7 @@
   },
   "dependencies": {
     "fs-extra": "^5.0.0",
-    "stumpfi": "^4.0.1"
+    "stumpfi": "^5.0.0"
   },
   "scripts": {
     "start": "ts-node scripts/start",
