@@ -32,11 +32,10 @@ const camelCaseToAttribute : (camelCase : string) => string = camelCase => (
  */
 const renderResource : (data : JsonResource) => string = (data) => {
   const dataAttributes : Attributes = data.attributes;
-  /** @todo false attribute */
   const attributes : string = Object.keys(dataAttributes).reduce((str, attribute) => (
     (typeof dataAttributes[attribute] === 'string')
       ? `${str} ${camelCaseToAttribute(attribute)}="${dataAttributes[attribute]}"`
-      : `${str} ${camelCaseToAttribute(attribute)}`
+      : (dataAttributes[attribute] === true) ? `${str} ${camelCaseToAttribute(attribute)}` : str
   ), '').trim();
 
   switch (data.type) {
@@ -93,7 +92,10 @@ export default function toHTML(document : Document) : string {
 
 
   // Fills the register with a JSON content generated from a stumpfi Content instance.
-  const contentToJson : (content : Content) => string = (content) => {
+  const contentToJson : (content : Content | null) => string | null = (content) => {
+    if (content === null) {
+      return null;
+    }
     if (jsonEntities.contents[content.getId()] === undefined) {
       jsonEntities.contents[content.getId()] = {
         type: content.getType(),

@@ -28,9 +28,8 @@ export default function fromHTML(htmlDocument : string) : Document {
 
   try {
     // This regexp helps us to extract the JSON declaration from the HTML document.
-    const jsonRegexp : RegExp = /\<body><div style="display: none;">{(.*)}<\/div>\<\/body>/;
+    const jsonRegexp : RegExp = /<body><div style=\\"display: none;\\">{(.*)}<\/div><\/body>/i;
     const jsonDocument : RegExpExecArray | null = jsonRegexp.exec(htmlDocument);
-
     if (jsonDocument === null) {
       throw new Error('Input string is not a valid stumpfi HTML document.');
     }
@@ -87,7 +86,9 @@ export default function fromHTML(htmlDocument : string) : Document {
         entities.components[componentId].setDimensions(jsonComponent.dimensions);
         entities.components[componentId].setTemplate(jsonToTemplate(jsonComponent.template));
         jsonComponent.contents.forEach((content, index) => {
-          entities.components[componentId].setContentAt(index, jsonToContent(content));
+          if (content !== null) {
+            entities.components[componentId].setContentAt(index, jsonToContent(content));
+          }
         });
       }
       return entities.components[componentId];

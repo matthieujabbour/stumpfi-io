@@ -31,7 +31,7 @@ export interface JsonTemplate {
 
 /** JSON-formatted stumpfi component type declaration. */
 export interface JsonComponent {
-  readonly contents : string[];
+  readonly contents : (string | null)[];
   readonly coordinates : Coordinates;
   readonly dimensions : Dimensions;
   readonly template : string;

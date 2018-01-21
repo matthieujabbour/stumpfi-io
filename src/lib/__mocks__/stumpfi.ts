@@ -55,32 +55,17 @@ const content2 : object = {
   getType: jest.fn(() => 'SIMPLE_TEXT'),
   getMarkupText: jest.fn(() => 'test content 2'),
 };
-const content3 : object = {
-  getId: jest.fn(() => 'content3'),
-  getType: jest.fn(() => 'SIMPLE_TEXT'),
-  getMarkupText: jest.fn(() => ''),
-};
-const content4 : object = {
-  getId: jest.fn(() => 'content4'),
-  getType: jest.fn(() => 'SIMPLE_TEXT'),
-  getMarkupText: jest.fn(() => ''),
-};
-const content5 : object = {
-  getId: jest.fn(() => 'content5'),
-  getType: jest.fn(() => 'SIMPLE_TEXT'),
-  getMarkupText: jest.fn(() => ''),
-};
 const component1 : object = {
   getId: jest.fn(() => 'component1'),
   getTemplate: jest.fn(() => template1),
-  getContents: jest.fn(() => [content1, content3, content4, content2]),
+  getContents: jest.fn(() => [content1, null, null, content2]),
   getCoordinates: jest.fn(() => ({ x: 50, y: 64 })),
   getDimensions: jest.fn(() => ({ w: 12, h: 7 })),
 };
 const component2 : object = {
   getId: jest.fn(() => 'component2'),
   getTemplate: jest.fn(() => template1),
-  getContents: jest.fn(() => [content5, content1]),
+  getContents: jest.fn(() => [null, content1]),
   getCoordinates: jest.fn(() => ({ x: 32, y: 21 })),
   getDimensions: jest.fn(() => ({ w: 85, h: 65 })),
 };

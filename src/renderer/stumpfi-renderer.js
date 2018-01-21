@@ -63,8 +63,8 @@ window.onload = function() {
   const camelCaseToAttribute = camelCase => (
     camelCase.replace(/([A-Z])/g, '-$1').toLowerCase()
   );
-  
-  
+
+
   /**
    * Renders a resource into an HTML tag.
    * @param {JsonResource} data The resource to render.
@@ -75,9 +75,9 @@ window.onload = function() {
     const attributes = Object.keys(dataAttributes).reduce((str, attribute) => (
       (typeof dataAttributes[attribute] === 'string')
         ? `${str} ${camelCaseToAttribute(attribute)}="${dataAttributes[attribute]}"`
-        : `${str} ${camelCaseToAttribute(attribute)}`
+        : (dataAttributes[attribute] === true) ? `${str} ${camelCaseToAttribute(attribute)}` : str
     ), '').trim();
-  
+
     switch (data.type) {
       case 'style':
       return `<style ${attributes}>${data.content || ''}</style>`;
@@ -107,8 +107,9 @@ window.onload = function() {
       let index = 0;
       return (match, pattern) => {
         // No associated content...
-        if (data.contents[index] === undefined) {
-          return escape('PLACEHOLDER');
+        if (data.contents[index] === null || data.contents[index] === undefined) {
+          ++index;
+          return '';
         }
 
         if (pattern !== jsonEntities.contents[data.contents[index]].type) {
@@ -187,7 +188,7 @@ window.onload = function() {
 
     return `<iframe srcDoc="${escape(srcDoc)}" class="stumpfi page"></iframe>`;
   };
-  
+
 
   let innerHTML = '';
   Object.keys(jsonEntities.documents).forEach((documentId) => {
