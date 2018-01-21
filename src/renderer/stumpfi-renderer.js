@@ -156,7 +156,7 @@ window.onload = function() {
       attributes: { type: 'text/css' },
       content: 'div[data-component-id]{overflow: auto; position: absolute;}' +
       'body{width: calc(16/9 * 100vh); height: calc(9/16 * 100vw); max-width: 100vw;' +
-      'max-height: 100vh; position: relative; margin: 0;}',
+      'max-height: 100vh; position: relative; margin: 0; overflow: hidden;}',
     });
 
     let page = data;
