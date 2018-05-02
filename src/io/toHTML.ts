@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 - present, Matthieu Jabbour <matthieu.jabbour@gmail.com>.
+ * Copyright 2017 - present, Matthieu Jabbour <matthieu.jabbour@gmail.com>.
  * All rights reserved.
  */
 
@@ -10,6 +10,9 @@ import { Attributes, Component, Content, Document, Page, Resource, Template } fr
 import { JsonDocument, JsonEntities, JsonResource } from '../types';
 import escape from '../utils/escape';
 
+
+console.log(__dirname); // tslint:disable-line
+console.log(path.resolve(__dirname, './stumpfi-renderer.min.js')); // tslint:disable-line
 
 /** Path to the stumpfi-renderer JS script. */
 const stumpfiRendererFilePath : string = path.resolve(__dirname, './stumpfi-renderer.min.js');

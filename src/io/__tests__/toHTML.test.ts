@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 - present, Matthieu Jabbour <matthieu.jabbour@gmail.com>.
+ * Copyright 2017 - present, Matthieu Jabbour <matthieu.jabbour@gmail.com>.
  * All rights reserved.
  */
 
@@ -14,7 +14,7 @@ jest.mock('stumpfi');
 
 
 describe('toHTML', () => {
-  test('should correctly render a stumpfi Document', () => {
+  test('should correctly export a stumpfi Document', () => {
     expect(toHTML(new Document())).toMatchSnapshot();
   });
 });

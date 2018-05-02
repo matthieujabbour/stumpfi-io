@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 - present, Matthieu Jabbour <matthieu.jabbour@gmail.com>.
+ * Copyright 2017 - present, Matthieu Jabbour <matthieu.jabbour@gmail.com>.
  * All rights reserved.
  */
 
@@ -44,6 +44,7 @@ export default function fromHTML(htmlDocument : string) : Document {
           jsonEntities.contents[contentId].type,
           jsonEntities.contents[contentId].markupText,
         );
+        entities.contents[contentId].setId(contentId);
       }
       return entities.contents[contentId];
     };
@@ -60,6 +61,7 @@ export default function fromHTML(htmlDocument : string) : Document {
         Object.keys(jsonResource.attributes).forEach((attr) => {
           entities.resources[resourceId].setAttribute(attr, jsonResource.attributes[attr]);
         });
+        entities.resources[resourceId].setId(resourceId);
       }
       return entities.resources[resourceId];
     };
@@ -72,6 +74,7 @@ export default function fromHTML(htmlDocument : string) : Document {
         jsonEntities.templates[templateId].resources.forEach((resource) => {
           entities.templates[templateId].addResource(jsonToResource(resource));
         });
+        entities.templates[templateId].setId(templateId);
       }
       return entities.templates[templateId];
     };
@@ -90,6 +93,7 @@ export default function fromHTML(htmlDocument : string) : Document {
             entities.components[componentId].setContentAt(index, jsonToContent(content));
           }
         });
+        entities.components[componentId].setId(componentId);
       }
       return entities.components[componentId];
     };
@@ -108,6 +112,7 @@ export default function fromHTML(htmlDocument : string) : Document {
         jsonEntities.pages[pageId].components.forEach((component) => {
           entities.pages[pageId].addComponent(jsonToComponent(component));
         });
+        entities.pages[pageId].setId(pageId);
       }
       return entities.pages[pageId];
     };
@@ -131,7 +136,7 @@ export default function fromHTML(htmlDocument : string) : Document {
     jsonEntities.documents[documentId].pages.forEach((pageId) => {
       document.addPage(jsonToPage(pageId));
     });
-
+    document.setId(documentId);
     return document;
   } catch (error) {
     throw new Error(`Given input is not a valid stumpfi HTML document (${error.message}).`);

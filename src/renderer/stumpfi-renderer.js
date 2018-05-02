@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 - present, Matthieu Jabbour <matthieu.jabbour@gmail.com>.
+ * Copyright 2017 - present, Matthieu Jabbour <matthieu.jabbour@gmail.com>.
  * All rights reserved.
  */
 
@@ -50,7 +50,7 @@ const contentTypesRenderers = {
 };
 
 
-window.onload = function() {
+window.onload = () => {
   const jsonEntities = JSON.parse(unescape(document.body.childNodes[0].innerHTML));
   let parseError = false;
 
@@ -72,15 +72,18 @@ window.onload = function() {
    */
   const renderResource = (data) => {
     const dataAttributes = data.attributes;
-    const attributes = Object.keys(dataAttributes).reduce((str, attribute) => (
-      (typeof dataAttributes[attribute] === 'string')
-        ? `${str} ${camelCaseToAttribute(attribute)}="${dataAttributes[attribute]}"`
-        : (dataAttributes[attribute] === true) ? `${str} ${camelCaseToAttribute(attribute)}` : str
-    ), '').trim();
+    const attributes = Object.keys(dataAttributes).reduce((str, attribute) => {
+      if (typeof dataAttributes[attribute] === 'string') {
+        return `${str} ${camelCaseToAttribute(attribute)}="${dataAttributes[attribute]}"`;
+      }
+      return (dataAttributes[attribute] === true)
+        ? `${str} ${camelCaseToAttribute(attribute)}`
+        : str;
+    }, '').trim();
 
     switch (data.type) {
       case 'style':
-      return `<style ${attributes}>${data.content || ''}</style>`;
+        return `<style ${attributes}>${data.content || ''}</style>`;
       case 'script':
         return `<script ${attributes}>${data.content || ''}</script>`;
       default:
@@ -96,19 +99,19 @@ window.onload = function() {
    */
   const renderComponent = (data) => {
     const style = (
-      `position: absolute;` +
+      'position: absolute;' +
       `width: ${data.dimensions.w}%;` +
       `height: ${data.dimensions.h}%;` +
       `top: ${data.coordinates.y}%;` +
       `left: ${data.coordinates.x}%;`
     );
 
-    const replacer = (() => {
+    const typeReplacer = (() => {
       let index = 0;
       return (match, pattern) => {
         // No associated content...
         if (data.contents[index] === null || data.contents[index] === undefined) {
-          ++index;
+          index += 1;
           return '';
         }
 
@@ -116,14 +119,15 @@ window.onload = function() {
           console.warn(`Content #${data.contents[index]}'s type is not compatible with ${pattern}.`);
           parseError = true;
         }
-        const escapedContent = escape(jsonEntities.contents[data.contents[index++]].markupText);
+        const escapedContent = escape(jsonEntities.contents[data.contents[index]].markupText);
+        index += 1;
         return contentTypesRenderers[pattern](escapedContent);
       };
     })();
 
     const template = jsonEntities.templates[data.template];
-    const hydratedTemplate = template.code.replace(/\{\{(RICH_TEXT|SIMPLE_TEXT|MEDIA)\}\}/g, replacer);
-    return `<div style="${style}">${hydratedTemplate}</div>`
+    const hydratedTemplate = template.code.replace(/\{\{(RICH_TEXT|SIMPLE_TEXT|MEDIA)\}\}/g, typeReplacer);
+    return `<div style="${style}">${hydratedTemplate}</div>`;
   };
 
 
@@ -139,7 +143,7 @@ window.onload = function() {
     const htmlResources = {};
 
     // This script is used to automatically scale page's font size to its width.
-    htmlResources['autoresizeScript'] = renderResource({
+    htmlResources.autoresizeScript = renderResource({
       type: 'script',
       attributes: { type: 'text/javascript' },
       content: 'function scale() {' +
@@ -148,10 +152,10 @@ window.onload = function() {
       '}' +
       'window.addEventListener(\'resize\', scale); window.onload = scale;',
     });
- 
+
     // This style is used to automatically scale page's dimensions to frame size,
     // keeping the specified ratio.
-    htmlResources['autoresizeStyle'] = renderResource({
+    htmlResources.autoresizeStyle = renderResource({
       type: 'style',
       attributes: { type: 'text/css' },
       content: 'div[data-component-id]{overflow: auto; position: absolute;}' +
@@ -175,15 +179,15 @@ window.onload = function() {
       page = (page.master === null) ? null : jsonEntities.pages[page.master];
     }
     const srcDoc = (
-      `<!DOCTYPE html>` +
-      `<html>` +
-        `<head>` +
+      '<!DOCTYPE html>' +
+      '<html>' +
+        '<head>' +
           `${Object.keys(htmlResources).map(resourceId => htmlResources[resourceId]).join('')}` +
-        `</head>` +
-        `<body>` +
+        '</head>' +
+        '<body>' +
           `${htmlComponents.join('')}` +
-        `</body>` +
-      `</html>`
+        '</body>' +
+      '</html>'
     );
 
     return `<iframe srcDoc="${escape(srcDoc)}" class="stumpfi page"></iframe>`;
@@ -199,6 +203,6 @@ window.onload = function() {
   });
 
   if (parseError === true) {
-    console.error('One or many errors occured during document rendering. This may affect displaying.');
+    console.error('One or several errors occured during document rendering. This may affect displaying.');
   }
 };

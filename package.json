@@ -1,10 +1,10 @@
 {
   "name": "stumpfi-io",
-  "version": "3.0.0",
+  "version": "1.0.0",
   "description": "Converts stumpfi documents to HTML and vice-versa.",
   "repository": "https://github.com/matthieujabbour/stumpfi-io",
   "homepage": "https://github.com/matthieujabbour/stumpfi-io",
-  "main": "./src/main.ts",
+  "main": "./main.ts",
   "keywords": [
     "stumpfi",
     "documents",
@@ -27,46 +27,16 @@
   "types": "./config/types.d.ts",
   "devDependencies": {
     "@types/fs-extra": "^5.0.0",
-    "@types/jest": "^22.0.1",
-    "@types/webpack": "^3.0.9",
-    "awesome-typescript-loader": "^3.2.3",
-    "jest": "^22.1.4",
-    "ts-jest": "^22.0.1",
-    "ts-node": "^4.0.1",
-    "tslint": "^5.6.0",
-    "tslint-config-stumpfi": "^1.0.7",
-    "tslint-loader": "^3.5.3",
-    "typedoc": "^0.9.0",
-    "typescript": "^2.4.2",
-    "webpack": "^3.5.5"
+    "typescript-dev-kit": "^0.0.15"
   },
   "dependencies": {
-    "fs-extra": "^5.0.0",
-    "stumpfi": "^5.0.0"
+    "fs-extra": "^6.0.0",
+    "stumpfi": "^6.0.0"
   },
   "scripts": {
-    "start": "ts-node scripts/start",
-    "build": "ts-node scripts/build",
-    "test": "ts-node scripts/test --coverage --watch",
-    "doc": "./node_modules/.bin/typedoc --out ./doc/ src/ --exclude \"**/__+(tests|mocks)__/**\""
-  },
-  "engines": {
-    "node": ">= 4"
-  },
-  "jest": {
-    "mapCoverage": true,
-    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
-    "transform": {
-      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
-    },
-    "roots": [
-      "<rootDir>/src"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "json"
-    ]
+    "start": "cd node_modules/typescript-dev-kit/ && node scripts/start",
+    "build": "cd node_modules/typescript-dev-kit/ && node scripts/build",
+    "test": "cd node_modules/typescript-dev-kit/ && node scripts/test",
+    "doc": "node_modules/.bin/typedoc --out ./doc/ src/ --exclude \"**/__+(tests|mocks)__/**\""
   }
 }

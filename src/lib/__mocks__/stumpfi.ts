@@ -1,10 +1,7 @@
 /**
- * Copyright 2016 - present, Matthieu Jabbour <matthieu.jabbour@gmail.com>.
+ * Copyright 2017 - present, Matthieu Jabbour <matthieu.jabbour@gmail.com>.
  * All rights reserved.
  */
-
-
-/* tslint:disable max-classes-per-file prefer-function-over-method */
 
 
 /**
@@ -92,27 +89,34 @@ const page3 : object = {
 /**
  * These objects are used to simulate new instances declarations.
  */
-const content : object = {};
+const content : object = {
+  setId: jest.fn(),
+};
 const resource : object = {
+  setId: jest.fn(),
   setContent: jest.fn(),
   setAttribute: jest.fn(),
 };
 const template : object = {
+  setId: jest.fn(),
   addResource: jest.fn(),
   setCode: jest.fn(),
 };
 const component : object = {
+  setId: jest.fn(),
   setCoordinates: jest.fn(),
   setDimensions: jest.fn(),
   setTemplate: jest.fn(),
   setContentAt: jest.fn(),
 };
 const page : object = {
+  setId: jest.fn(),
   addResource: jest.fn(),
   addComponent: jest.fn(),
   setMaster: jest.fn(),
 };
 const document : object = {
+  setId: jest.fn(),
   getId: jest.fn(() => 'document1'),
   getName: jest.fn(() => 'test name'),
   getDescription: jest.fn(() => 'test description'),
